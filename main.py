@@ -4,10 +4,11 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 import datetime
 import pandas
+import pprint
 
 excel_data_df = pandas.read_excel('wine.xlsx')
 wine_data = excel_data_df.to_dict('records')
-print(wine_data)
+pprint.pprint(wine_data)
 
 
 event1 = datetime.datetime.now()
@@ -29,23 +30,17 @@ else:
 
 env = Environment(
     loader=FileSystemLoader('.'),
-    autoescape=select_autoescape(['html', 'xml'])
-)
+    autoescape=select_autoescape(['html', 'xml','png'])
+)        
+index = env.get_template('index.html')
 
-template = env.get_template('template.html')
+rendered_page = index.render(
+    wine_data=wine_data,
+    winery_text=f'вы уже {age} {age_declensions} с нами'
+    )
 
-rendered_age = template.render(
-    winery_text='мы уже {} {} с вами'.format(age, age_declensions),
-    
-)
-
-rendered_wine = template.render(wine_data=wine_data)
-
-with open('index.html', 'w', encoding="utf-8") as file:
-    file.write(rendered_wine)
-
-with open('index.html', 'w', encoding="utf-8") as file:
-    file.write(rendered_age)
+with open('template.html', 'w', encoding="utf-8") as file:
+    file.write(rendered_page)
 
 server = HTTPServer(('0.0.0.0', 8000), SimpleHTTPRequestHandler)
 server.serve_forever()
